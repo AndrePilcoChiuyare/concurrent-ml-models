@@ -1,9 +1,11 @@
 package main
 
 import (
-	"PC2/pkg/nn"
+	"PC2/pkg/ann"
 	"PC2/pkg/rf"
 	"PC2/pkg/svm"
+
+	"PC2/pkg/dnn"
 	"encoding/csv"
 	"fmt"
 	"io"
@@ -139,155 +141,203 @@ func main() {
 	// var predictions []interface{}
 	var times [][]time.Duration
 
-	// SVM -------------------------------------------------
-	var svmModels []*svm.SVM
-	var svmPredictions [][]float64
-	var svmAccuracies []float64
-	var svmTimes []time.Duration
+	// // SVM -------------------------------------------------
+	// var svmModels []*svm.SVM
+	// var svmPredictions [][]float64
+	// var svmAccuracies []float64
+	// var svmTimes []time.Duration
 
-	// SVM models
-	svmSequentialModel := svm.NewSVM(0.1, 100)
-	svmConcurrentModel := svm.NewSVM(0.1, 100)
-	svmModels = append(svmModels, svmSequentialModel, svmConcurrentModel)
+	// // SVM models
+	// svmSequentialModel := svm.NewSVM(0.1, 100)
+	// svmConcurrentModel := svm.NewSVM(0.1, 100)
+	// svmModels = append(svmModels, svmSequentialModel, svmConcurrentModel)
 
-	models = append(models, svmModels)
+	// models = append(models, svmModels)
+
+	// // Training times
+	// svmStartSeq := time.Now()
+	// svmModels[0].Train(XTrain, YTrain)
+	// svmElapsedSeq := time.Since(svmStartSeq)
+
+	// svmStartCon := time.Now()
+	// svmModels[1].TrainConcurrently(XTrain, YTrain)
+	// svmElapsedCon := time.Since(svmStartCon)
+
+	// svmTimes = append(svmTimes, svmElapsedSeq, svmElapsedCon)
+	// times = append(times, svmTimes)
+
+	// // Predictions
+	// svmPredictionsSequential := svmModels[0].Predict(XTest)
+	// svmPredictionsConcurrent := svmModels[1].Predict(XTest)
+	// svmPredictions = append(svmPredictions, svmPredictionsSequential, svmPredictionsConcurrent)
+	// // predictions = append(predictions, svmPredictions)
+
+	// // Accuracies
+	// svmAccuracySequential := calculateAccuracy(svmPredictions[0], YTest)
+	// svmAccuracyConcurrent := calculateAccuracy(svmPredictions[1], YTest)
+	// svmAccuracies = append(svmAccuracies, svmAccuracySequential, svmAccuracyConcurrent)
+	// accuracies = append(accuracies, svmAccuracies)
+	// // SVM -------------------------------------------------
+
+	// // Random forest ---------------------------------------
+	// XTrainRF := XTrain[:1000]
+	// YTrainRF := YTrain[:1000]
+	// XTestRF := XTest[:100]
+	// YTestRF := YTest[:100]
+
+	// var rfModels []*rf.RandomForest
+	// // var rfPredictions [][]float64
+	// var rfAccuracies []float64
+	// var rfTimes []time.Duration
+
+	// // Random Forest models
+	// rfSequentialModel := rf.NewRandomForest(10)
+	// rfConcurrentModel := rf.NewRandomForest(10)
+	// rfModels = append(rfModels, rfSequentialModel, rfConcurrentModel)
+
+	// models = append(models, rfModels)
+
+	// // Training times
+	// rfStartSeq := time.Now()
+	// rfModels[0].Train(XTrainRF, YTrainRF)
+	// rfElapsedSeq := time.Since(rfStartSeq)
+
+	// rfStartCon := time.Now()
+	// rfModels[1].TrainConcurrently(XTrainRF, YTrainRF)
+	// rfElapsedCon := time.Since(rfStartCon)
+
+	// rfTimes = append(rfTimes, rfElapsedSeq, rfElapsedCon)
+	// times = append(times, rfTimes)
+
+	// // Predictions
+	// var rfPredictionsSequential []float64
+	// var rfPredictionsConcurrent []float64
+
+	// for _, x := range XTestRF {
+	// 	rfPredictionsSequential = append(rfPredictionsSequential, rfModels[0].Predict(x))
+	// 	rfPredictionsConcurrent = append(rfPredictionsConcurrent, rfModels[1].Predict(x))
+	// }
+
+	// // rfPredictions = append(rfPredictions, rfPredictionsSequential, rfPredictionsConcurrent)
+
+	// // Accuracies
+	// rfAccuracySequential := calculateAccuracy(rfPredictionsSequential, YTestRF)
+	// rfAccuracyConcurrent := calculateAccuracy(rfPredictionsConcurrent, YTestRF)
+	// rfAccuracies = append(rfAccuracies, rfAccuracySequential, rfAccuracyConcurrent)
+
+	// accuracies = append(accuracies, rfAccuracies)
+	// // Random forest ---------------------------------------
+
+	// // Artificial Neural Network ---------------------------------
+	// // NN parameters
+	// var nnModels []*ann.NeuralNetwork
+	// var nnPredictions [][]float64
+	// var nnAccuracies []float64
+	// var nnTimes []time.Duration
+
+	// // ANN models
+	// inputs := 24
+	// hiddenNeurons := 3
+	// outputs := 1
+	// learningRate := 0.5
+
+	// nnSequentialModel := ann.NewNeuralNetwork(inputs, hiddenNeurons, outputs, learningRate)
+	// nnConcurrentModel := ann.NewNeuralNetwork(inputs, hiddenNeurons, outputs, learningRate)
+	// nnModels = append(nnModels, nnSequentialModel, nnConcurrentModel)
+
+	// models = append(models, nnModels)
+
+	// // Training times
+	// nnStartSeq := time.Now()
+	// for epoch := 0; epoch < 100; epoch++ {
+	// 	for i := range XTrain {
+	// 		nnModels[0].Train(XTrain[i], []float64{YTrain[i]})
+	// 	}
+	// }
+	// nnElapsedSeq := time.Since(nnStartSeq)
+
+	// nnStartCon := time.Now()
+	// for epoch := 0; epoch < 100; epoch++ {
+	// 	for i := range XTrain {
+	// 		nnModels[1].Train(XTrain[i], []float64{YTrain[i]})
+	// 	}
+	// }
+	// nnElapsedCon := time.Since(nnStartCon)
+
+	// nnTimes = append(nnTimes, nnElapsedSeq, nnElapsedCon)
+	// times = append(times, nnTimes)
+
+	// // Predictions
+	// var nnPredictionsSequential []float64
+	// var nnPredictionsConcurrent []float64
+
+	// for i := range XTest {
+	// 	outputSeq := nnModels[0].Forward(XTest[i])
+	// 	thresholdedOutputSeq := applyThreshold(outputSeq[0])
+	// 	nnPredictionsSequential = append(nnPredictionsSequential, float64(thresholdedOutputSeq))
+
+	// 	outputCon := nnModels[1].Forward(XTest[i])
+	// 	thresholdedOutputCon := applyThreshold(outputCon[0])
+	// 	nnPredictionsConcurrent = append(nnPredictionsConcurrent, float64(thresholdedOutputCon))
+	// }
+
+	// nnPredictions = append(nnPredictions, nnPredictionsSequential, nnPredictionsConcurrent)
+
+	// // Accuracies
+	// nnAccuracySequential := calculateAccuracy(nnPredictions[0], YTest)
+	// nnAccuracyConcurrent := calculateAccuracy(nnPredictions[1], YTest)
+	// nnAccuracies = append(nnAccuracies, nnAccuracySequential, nnAccuracyConcurrent)
+	// accuracies = append(accuracies, nnAccuracies)
+
+	// // Artificial Neural Network ---------------------------------
+
+	// Deep Neural Network ---------------------------------------
+	// Initialize neural network (input layer with 2 neurons, 2 hidden layers with 4 and 3 neurons, and output layer with 1 neuron)
+	var dnnModels []*dnn.NeuralNetwork
+	var dnnAccuracies []float64
+	var dnnTimes []time.Duration
+
+	// DNN models
+	dnnSequentialModel := dnn.NeuralNetwork{}
+	dnnSequentialModel.Initialize([]int{24, 4, 3, 1}, 0.01)
+	dnnConcurrentModel := dnn.NeuralNetwork{}
+	dnnConcurrentModel.Initialize([]int{24, 4, 3, 1}, 0.01)
+	dnnModels = append(dnnModels, &dnnSequentialModel, &dnnConcurrentModel)
+
+	models = append(models, dnnModels)
 
 	// Training times
-	svmStartSeq := time.Now()
-	svmModels[0].Train(XTrain, YTrain)
-	svmElapsedSeq := time.Since(svmStartSeq)
+	dnnStartSeq := time.Now()
+	dnnSequentialModel.Train(XTrain, YTrain, 3)
+	dnnElapsedSeq := time.Since(dnnStartSeq)
 
-	svmStartCon := time.Now()
-	svmModels[1].TrainConcurrently(XTrain, YTrain)
-	svmElapsedCon := time.Since(svmStartCon)
+	dnnStartCon := time.Now()
+	dnnConcurrentModel.TrainConcurrently(XTrain, YTrain, 3)
+	dnnElapsedCon := time.Since(dnnStartCon)
 
-	svmTimes = append(svmTimes, svmElapsedSeq, svmElapsedCon)
-	times = append(times, svmTimes)
-
-	// Predictions
-	svmPredictionsSequential := svmModels[0].Predict(XTest)
-	svmPredictionsConcurrent := svmModels[1].Predict(XTest)
-	svmPredictions = append(svmPredictions, svmPredictionsSequential, svmPredictionsConcurrent)
-	// predictions = append(predictions, svmPredictions)
-
-	// Accuracies
-	svmAccuracySequential := calculateAccuracy(svmPredictions[0], YTest)
-	svmAccuracyConcurrent := calculateAccuracy(svmPredictions[1], YTest)
-	svmAccuracies = append(svmAccuracies, svmAccuracySequential, svmAccuracyConcurrent)
-	accuracies = append(accuracies, svmAccuracies)
-	// SVM -------------------------------------------------
-
-	// Random forest ---------------------------------------
-	XTrainRF := XTrain[:1000]
-	YTrainRF := YTrain[:1000]
-	XTestRF := XTest[:100]
-	YTestRF := YTest[:100]
-
-	var rfModels []*rf.RandomForest
-	// var rfPredictions [][]float64
-	var rfAccuracies []float64
-	var rfTimes []time.Duration
-
-	// Random Forest models
-	rfSequentialModel := rf.NewRandomForest(10)
-	rfConcurrentModel := rf.NewRandomForest(10)
-	rfModels = append(rfModels, rfSequentialModel, rfConcurrentModel)
-
-	models = append(models, rfModels)
-
-	// Training times
-	rfStartSeq := time.Now()
-	rfModels[0].Train(XTrainRF, YTrainRF)
-	rfElapsedSeq := time.Since(rfStartSeq)
-
-	rfStartCon := time.Now()
-	rfModels[1].TrainConcurrently(XTrainRF, YTrainRF)
-	rfElapsedCon := time.Since(rfStartCon)
-
-	rfTimes = append(rfTimes, rfElapsedSeq, rfElapsedCon)
-	times = append(times, rfTimes)
+	dnnTimes = append(dnnTimes, dnnElapsedSeq, dnnElapsedCon)
+	times = append(times, dnnTimes)
 
 	// Predictions
-	var rfPredictionsSequential []float64
-	var rfPredictionsConcurrent []float64
-
-	for _, x := range XTestRF {
-		rfPredictionsSequential = append(rfPredictionsSequential, rfModels[0].Predict(x))
-		rfPredictionsConcurrent = append(rfPredictionsConcurrent, rfModels[1].Predict(x))
-	}
-
-	// rfPredictions = append(rfPredictions, rfPredictionsSequential, rfPredictionsConcurrent)
-
-	// Accuracies
-	rfAccuracySequential := calculateAccuracy(rfPredictionsSequential, YTestRF)
-	rfAccuracyConcurrent := calculateAccuracy(rfPredictionsConcurrent, YTestRF)
-	rfAccuracies = append(rfAccuracies, rfAccuracySequential, rfAccuracyConcurrent)
-
-	accuracies = append(accuracies, rfAccuracies)
-	// Random forest ---------------------------------------
-
-	// Artificial Neural Network ---------------------------------
-	// NN parameters
-	var nnModels []*nn.NeuralNetwork
-	var nnPredictions [][]float64
-	var nnAccuracies []float64
-	var nnTimes []time.Duration
-
-	// ANN models
-	inputs := 24
-	hiddenNeurons := 3
-	outputs := 1
-	learningRate := 0.5
-
-	nnSequentialModel := nn.NewNeuralNetwork(inputs, hiddenNeurons, outputs, learningRate)
-	nnConcurrentModel := nn.NewNeuralNetwork(inputs, hiddenNeurons, outputs, learningRate)
-	nnModels = append(nnModels, nnSequentialModel, nnConcurrentModel)
-
-	models = append(models, nnModels)
-
-	// Training times
-	nnStartSeq := time.Now()
-	for epoch := 0; epoch < 5; epoch++ {
-		for i := range XTrain {
-			nnModels[0].Train(XTrain[i], []float64{YTrain[i]})
-		}
-	}
-	nnElapsedSeq := time.Since(nnStartSeq)
-
-	nnStartCon := time.Now()
-	for epoch := 0; epoch < 5; epoch++ {
-		for i := range XTrain {
-			nnModels[1].Train(XTrain[i], []float64{YTrain[i]})
-		}
-	}
-	nnElapsedCon := time.Since(nnStartCon)
-
-	nnTimes = append(nnTimes, nnElapsedSeq, nnElapsedCon)
-	times = append(times, nnTimes)
-
-	// Predictions
-	var nnPredictionsSequential []float64
-	var nnPredictionsConcurrent []float64
+	var dnnPredictionsSequential []float64
+	var dnnPredictionsConcurrent []float64
 
 	for i := range XTest {
-		outputSeq := nnModels[0].Forward(XTest[i])
+		_, outputSeq := dnnSequentialModel.Forward(XTest[i])
 		thresholdedOutputSeq := applyThreshold(outputSeq[0])
-		nnPredictionsSequential = append(nnPredictionsSequential, float64(thresholdedOutputSeq))
+		dnnPredictionsSequential = append(dnnPredictionsSequential, float64(thresholdedOutputSeq))
 
-		outputCon := nnModels[1].Forward(XTest[i])
+		_, outputCon := dnnConcurrentModel.Forward(XTest[i])
 		thresholdedOutputCon := applyThreshold(outputCon[0])
-		nnPredictionsConcurrent = append(nnPredictionsConcurrent, float64(thresholdedOutputCon))
+		dnnPredictionsConcurrent = append(dnnPredictionsConcurrent, float64(thresholdedOutputCon))
 	}
 
-	nnPredictions = append(nnPredictions, nnPredictionsSequential, nnPredictionsConcurrent)
-
 	// Accuracies
-	nnAccuracySequential := calculateAccuracy(nnPredictions[0], YTest)
-	nnAccuracyConcurrent := calculateAccuracy(nnPredictions[1], YTest)
-	nnAccuracies = append(nnAccuracies, nnAccuracySequential, nnAccuracyConcurrent)
-	accuracies = append(accuracies, nnAccuracies)
-
-	// Artificial Neural Network ---------------------------------
+	dnnAccuracySequential := calculateAccuracy(dnnPredictionsSequential, YTest)
+	dnnAccuracyConcurrent := calculateAccuracy(dnnPredictionsConcurrent, YTest)
+	dnnAccuracies = append(dnnAccuracies, dnnAccuracySequential, dnnAccuracyConcurrent)
+	accuracies = append(accuracies, dnnAccuracies)
+	// Deep Neural Network ---------------------------------------
 
 	for i := 0; i < len(models); i++ {
 		switch modelSlice := models[i].(type) {
@@ -323,8 +373,21 @@ func main() {
 				fmt.Printf("%s accuracy: %.2f%%\n", implementationType, accuracies[i][j]*100)
 				fmt.Println("---------------")
 			}
-		case []*nn.NeuralNetwork:
+		case []*ann.NeuralNetwork:
 			fmt.Println("Artificial Neural Network ---------------")
+			for j := 0; j < len(modelSlice); j++ {
+				var implementationType string
+				if j == 0 {
+					implementationType = "Sequential"
+				} else {
+					implementationType = "Concurrent"
+				}
+				fmt.Printf("%s training time: %s\n", implementationType, times[i][j])
+				fmt.Printf("%s accuracy: %.2f%%\n", implementationType, accuracies[i][j]*100)
+				fmt.Println("---------------")
+			}
+		case []*dnn.NeuralNetwork:
+			fmt.Println("Deep Neural Network ---------------")
 			for j := 0; j < len(modelSlice); j++ {
 				var implementationType string
 				if j == 0 {

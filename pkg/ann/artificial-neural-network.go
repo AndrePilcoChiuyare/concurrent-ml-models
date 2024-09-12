@@ -1,4 +1,4 @@
-package nn
+package ann
 
 import (
 	"math"
