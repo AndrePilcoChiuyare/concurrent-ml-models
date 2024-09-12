@@ -33,7 +33,7 @@ func (nn *NeuralNetwork) InitializeConcurrent(layerSizes []int, learningRate flo
 	}
 }
 
-// Forward propagation (concurrent)
+// Forward propagation (concurrent at the layer level)
 func (nn *NeuralNetwork) ForwardConcurrent(input []float64) ([][]float64, []float64) {
 	activations := make([][]float64, len(nn.layerSizes))
 	activations[0] = input
@@ -42,25 +42,26 @@ func (nn *NeuralNetwork) ForwardConcurrent(input []float64) ([][]float64, []floa
 	for l := 0; l < len(nn.layerSizes)-1; l++ {
 		nextLayer := make([]float64, nn.layerSizes[l+1])
 		var wg sync.WaitGroup
-		for j := 0; j < nn.layerSizes[l+1]; j++ {
-			wg.Add(1)
-			go func(j int) {
-				defer wg.Done()
+		// Parallelize by layer rather than neuron
+		wg.Add(1)
+		go func(l int) {
+			defer wg.Done()
+			for j := 0; j < nn.layerSizes[l+1]; j++ {
 				activation := nn.biases[l][j]
 				for i := 0; i < nn.layerSizes[l]; i++ {
 					activation += activations[l][i] * nn.weights[l][i][j]
 				}
 				nextLayer[j] = sigmoid(activation)
-			}(j)
-		}
-		wg.Wait() // Wait for all goroutines to finish
+			}
+		}(l)
+		wg.Wait()
 		activations[l+1] = nextLayer
 	}
 	return activations, activations[len(activations)-1]
 }
 
-// Backpropagation and weight update (concurrent)
-func (nn *NeuralNetwork) BackpropagationConcurrent(input []float64, target float64) {
+// Backpropagation and weight update (parallelized at the layer level, no frequent locking)
+func (nn *NeuralNetwork) BackpropagationConcurrentOptimized(input []float64, target float64) {
 	activations, output := nn.ForwardConcurrent(input)
 
 	// Output layer error
@@ -71,7 +72,7 @@ func (nn *NeuralNetwork) BackpropagationConcurrent(input []float64, target float
 		deltas[len(deltas)-1][j] = error * sigmoidDerivative(output[j])
 	}
 
-	// Backpropagate the error
+	// Backpropagate the error (parallelized at the layer level)
 	for l := len(deltas) - 2; l >= 0; l-- {
 		deltas[l] = make([]float64, nn.layerSizes[l+1])
 		for i := 0; i < nn.layerSizes[l+1]; i++ {
@@ -83,42 +84,62 @@ func (nn *NeuralNetwork) BackpropagationConcurrent(input []float64, target float
 		}
 	}
 
-	// Update weights and biases concurrently
+	// Update weights and biases (do the actual updates after calculating in parallel)
+	var wg sync.WaitGroup
 	for l := 0; l < len(nn.layerSizes)-1; l++ {
-		var wg sync.WaitGroup
-		for i := 0; i < nn.layerSizes[l]; i++ {
-			for j := 0; j < nn.layerSizes[l+1]; j++ {
-				wg.Add(1)
-				go func(l, i, j int) {
-					defer wg.Done()
-					nn.mu.Lock()
-					nn.weights[l][i][j] += nn.learningRate * deltas[l][j] * activations[l][i]
-					nn.mu.Unlock()
-				}(l, i, j)
+		wg.Add(1)
+		go func(l int) {
+			defer wg.Done()
+			weightUpdates := make([][]float64, nn.layerSizes[l])
+			for i := 0; i < nn.layerSizes[l]; i++ {
+				weightUpdates[i] = make([]float64, nn.layerSizes[l+1])
+				for j := 0; j < nn.layerSizes[l+1]; j++ {
+					weightUpdates[i][j] = nn.learningRate * deltas[l][j] * activations[l][i]
+				}
 			}
-		}
-		for j := 0; j < nn.layerSizes[l+1]; j++ {
-			wg.Add(1)
-			go func(l, j int) {
-				defer wg.Done()
-				nn.mu.Lock()
+
+			// Apply weight updates after calculation
+			for i := 0; i < nn.layerSizes[l]; i++ {
+				for j := 0; j < nn.layerSizes[l+1]; j++ {
+					nn.weights[l][i][j] += weightUpdates[i][j]
+				}
+			}
+			// Update biases
+			for j := 0; j < nn.layerSizes[l+1]; j++ {
 				nn.biases[l][j] += nn.learningRate * deltas[l][j]
-				nn.mu.Unlock()
-			}(l, j)
-		}
-		wg.Wait() // Wait for all weight/bias updates to finish
+			}
+		}(l)
 	}
+	wg.Wait() // Wait for all layer updates to complete
 }
 
-func (nn *NeuralNetwork) TrainConcurrently(inputs [][]float64, targets []float64, epochs int) {
+// Train the network concurrently with mini-batch
+func (nn *NeuralNetwork) TrainConcurrently(inputs [][]float64, targets []float64, epochs int, batchSize int) {
 	fmt.Println("Concurrent training")
 	for epoch := 0; epoch < epochs; epoch++ {
 		totalError := 0.0
-		for i := 0; i < len(inputs); i++ {
-			_, output := nn.ForwardConcurrent(inputs[i])
-			nn.BackpropagationConcurrent(inputs[i], targets[i])
-			totalError += math.Pow(targets[i]-output[0], 2)
+		fmt.Printf("Epoch %d starting...\n", epoch)
+
+		var wg sync.WaitGroup
+		for start := 0; start < len(inputs); start += batchSize {
+			end := start + batchSize
+			if end > len(inputs) {
+				end = len(inputs)
+			}
+			batchInputs := inputs[start:end]
+			batchTargets := targets[start:end]
+
+			wg.Add(1)
+			go func(batchInputs [][]float64, batchTargets []float64) {
+				defer wg.Done()
+				for i := 0; i < len(batchInputs); i++ {
+					_, output := nn.ForwardConcurrent(batchInputs[i])
+					nn.Backpropagation(batchInputs[i], batchTargets[i])
+					totalError += math.Pow(batchTargets[i]-output[0], 2)
+				}
+			}(batchInputs, batchTargets)
 		}
+		wg.Wait()
 		fmt.Printf("Epoch: %d, Error: %.5f\n", epoch, totalError/float64(len(inputs)))
 	}
 }

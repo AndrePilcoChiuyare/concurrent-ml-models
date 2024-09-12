@@ -111,7 +111,7 @@ func (nn *NeuralNetwork) Backpropagation(input []float64, target float64) {
 
 // Train the network
 func (nn *NeuralNetwork) Train(inputs [][]float64, targets []float64, epochs int) {
-	fmt.Println("Sequential training")
+	fmt.Println("DNN Sequential training")
 	for epoch := 0; epoch < epochs; epoch++ {
 		totalError := 0.0
 		for i := 0; i < len(inputs); i++ {
