@@ -1,2 +1,2 @@
 # concurrent-ml-models
-Concurrent and sequential machine learning models using go
+Concurrent version of machine learning models with Go.
