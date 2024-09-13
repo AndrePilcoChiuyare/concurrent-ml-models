@@ -4,6 +4,7 @@ import (
 	"PC2/pkg/ann"
 	"PC2/pkg/cf"
 	"PC2/pkg/dnn"
+	"PC2/pkg/lfm"
 	"PC2/pkg/rf"
 	"PC2/pkg/svm"
 	"encoding/csv"
@@ -353,9 +354,40 @@ func main() {
 	fmt.Printf("Recommended Movies (Sequential) for %d: %d\n", targetUserId, recommendationsSeq[:3])
 	fmt.Printf("Sequential recommendation time: %s\n", cfElapsedSeq)
 	fmt.Printf("Recommended Movies (Concurrent) for %d: %d\n", targetUserId, recommendationsCon[:3])
-	fmt.Printf("Sequential recommendation time: %s\n", cfElapsedCon)
+	fmt.Printf("Concurrent recommendation time: %s\n", cfElapsedCon)
 	fmt.Println("---------------")
 	// Collaborative filtering --------------------------------------
+
+	// Latent factor model (Matrix factorization) -------------------
+	lfmRatings, numUsers, numItems, err := lfm.LoadCSV("dataset/rating.csv")
+	if err != nil {
+		log.Fatalf("Error loading CSV: %v", err)
+	}
+
+	lfmModelSeq := lfm.NewLatentFactorModel(numUsers+1, numItems+1, 10, 0.01, 0.1)
+	lfmModelCon := lfm.NewConcurrentLatentFactorModel(numUsers+1, numItems+1, 10, 0.01, 0.1)
+
+	lfmStartSeq := time.Now()
+	lfmModelSeq.Train(lfmRatings, 20)
+	lfmElapsedSeq := time.Since(lfmStartSeq)
+
+	lfmStartCon := time.Now()
+	lfmModelCon.Train(lfmRatings, 20)
+	lfmElapsedCon := time.Since(lfmStartCon)
+
+	// Example prediction
+	userId := 1
+	itemId := 2
+	predictedRatingSeq := lfmModelSeq.Predict(userId, itemId)
+	predictedRatingCon := lfmModelCon.Predict(userId, itemId)
+
+	fmt.Println("Matrix factorization ---------------")
+	fmt.Printf("Predicted rating (Sequential) for user %d and item %d: %f\n", userId, itemId, predictedRatingSeq)
+	fmt.Printf("Sequential training time: %s\n", lfmElapsedSeq)
+	fmt.Printf("Predicted rating (Concurrent) for user %d and item %d: %f\n", userId, itemId, predictedRatingCon)
+	fmt.Printf("Concurrent training time: %s\n", lfmElapsedCon)
+	fmt.Println("---------------")
+	// Latent factor model (Matrix factorization) -------------------
 
 	for i := 0; i < len(models); i++ {
 		switch modelSlice := models[i].(type) {
