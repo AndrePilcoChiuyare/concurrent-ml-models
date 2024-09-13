@@ -2,13 +2,14 @@ package main
 
 import (
 	"PC2/pkg/ann"
+	"PC2/pkg/cf"
+	"PC2/pkg/dnn"
 	"PC2/pkg/rf"
 	"PC2/pkg/svm"
-
-	"PC2/pkg/dnn"
 	"encoding/csv"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"os"
 	"strconv"
@@ -330,6 +331,31 @@ func main() {
 	dnnAccuracies = append(dnnAccuracies, dnnAccuracySequential, dnnAccuracyConcurrent)
 	accuracies = append(accuracies, dnnAccuracies)
 	// Deep Neural Network ---------------------------------------
+
+	// Collaborative filtering --------------------------------------
+	// Load data from CSV
+	userRatings, err := cf.LoadCSV("dataset/rating.csv")
+	if err != nil {
+		log.Fatalf("Error loading CSV: %v", err)
+	}
+
+	// Example userId for whom we want recommendations
+	targetUserId := 1
+	cfStartSeq := time.Now()
+	recommendationsSeq := cf.RecommendMovies(targetUserId, userRatings)
+	cfElapsedSeq := time.Since(cfStartSeq)
+
+	cfStartCon := time.Now()
+	recommendationsCon := cf.RecommendMoviesConcurrent(targetUserId, userRatings)
+	cfElapsedCon := time.Since(cfStartCon)
+
+	fmt.Println("Colaborative filtering ---------------")
+	fmt.Printf("Recommended Movies (Sequential) for %d: %d\n", targetUserId, recommendationsSeq[:3])
+	fmt.Printf("Sequential recommendation time: %s\n", cfElapsedSeq)
+	fmt.Printf("Recommended Movies (Concurrent) for %d: %d\n", targetUserId, recommendationsCon[:3])
+	fmt.Printf("Sequential recommendation time: %s\n", cfElapsedCon)
+	fmt.Println("---------------")
+	// Collaborative filtering --------------------------------------
 
 	for i := 0; i < len(models); i++ {
 		switch modelSlice := models[i].(type) {
