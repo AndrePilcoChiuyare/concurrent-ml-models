@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
-	"sync"
 	"time"
 )
 
@@ -24,7 +23,6 @@ type NeuralNetwork struct {
 	weights      [][][]float64 // Weights between each layer
 	biases       [][]float64   // Biases for each layer
 	learningRate float64
-	mu           sync.Mutex
 }
 
 // Initialize the neural network with random weights and biases

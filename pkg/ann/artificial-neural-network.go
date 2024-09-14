@@ -7,17 +7,17 @@ import (
 	"time"
 )
 
-// Función de activación sigmoide
+// Sigmoid activation function
 func sigmoid(x float64) float64 {
 	return 1.0 / (1.0 + math.Exp(-x))
 }
 
-// Derivada de la función sigmoide
+// Sigmoid function derivative
 func sigmoidDerivative(x float64) float64 {
 	return x * (1.0 - x)
 }
 
-// Red neuronal con una capa oculta
+// Neural network with 1 hidden layer
 type NeuralNetwork struct {
 	inputs        int
 	hiddenNeurons int
@@ -30,7 +30,7 @@ type NeuralNetwork struct {
 	mu            sync.Mutex
 }
 
-// Inicializar la red neuronal
+// Initializing the neural network
 func NewNeuralNetwork(inputs, hiddenNeurons, outputs int, learningRate float64) *NeuralNetwork {
 	rand.Seed(time.Now().UnixNano())
 	nn := &NeuralNetwork{
@@ -42,7 +42,7 @@ func NewNeuralNetwork(inputs, hiddenNeurons, outputs int, learningRate float64) 
 		outputLayer:   make([]float64, outputs),
 	}
 
-	// Inicialización aleatoria de los pesos
+	// Initializing the weights randomly
 	nn.weightsInput = make([][]float64, inputs)
 	for i := range nn.weightsInput {
 		nn.weightsInput[i] = make([]float64, hiddenNeurons)
@@ -62,7 +62,7 @@ func NewNeuralNetwork(inputs, hiddenNeurons, outputs int, learningRate float64) 
 	return nn
 }
 
-// Propagación hacia adelante
+// Forward propagation
 func (nn *NeuralNetwork) Forward(inputs []float64) []float64 {
 	// Capa oculta
 	for i := 0; i < nn.hiddenNeurons; i++ {
@@ -73,7 +73,7 @@ func (nn *NeuralNetwork) Forward(inputs []float64) []float64 {
 		nn.hiddenLayer[i] = sigmoid(sum)
 	}
 
-	// Capa de salida
+	// Output layer
 	for i := 0; i < nn.outputs; i++ {
 		sum := 0.0
 		for j := 0; j < nn.hiddenNeurons; j++ {
@@ -85,15 +85,15 @@ func (nn *NeuralNetwork) Forward(inputs []float64) []float64 {
 	return nn.outputLayer
 }
 
-// Retropropagación
+// Backpropagation
 func (nn *NeuralNetwork) Backpropagation(inputs, expected []float64) {
-	// Cálculo del error de la capa de salida
+	// Computing the output layer error
 	outputErrors := make([]float64, nn.outputs)
 	for i := range nn.outputLayer {
 		outputErrors[i] = expected[i] - nn.outputLayer[i]
 	}
 
-	// Ajustar pesos de la capa de salida
+	// Adjusting output layer error
 	for i := 0; i < nn.hiddenNeurons; i++ {
 		for j := 0; j < nn.outputs; j++ {
 			delta := outputErrors[j] * sigmoidDerivative(nn.outputLayer[j])
@@ -101,7 +101,7 @@ func (nn *NeuralNetwork) Backpropagation(inputs, expected []float64) {
 		}
 	}
 
-	// Cálculo del error de la capa oculta
+	// Compute hidden layer error
 	hiddenErrors := make([]float64, nn.hiddenNeurons)
 	for i := 0; i < nn.hiddenNeurons; i++ {
 		errorSum := 0.0
@@ -111,7 +111,7 @@ func (nn *NeuralNetwork) Backpropagation(inputs, expected []float64) {
 		hiddenErrors[i] = errorSum
 	}
 
-	// Ajustar pesos de la capa de entrada
+	// Adjust input layer error
 	for i := 0; i < nn.inputs; i++ {
 		for j := 0; j < nn.hiddenNeurons; j++ {
 			delta := hiddenErrors[j] * sigmoidDerivative(nn.hiddenLayer[j])
@@ -120,7 +120,7 @@ func (nn *NeuralNetwork) Backpropagation(inputs, expected []float64) {
 	}
 }
 
-// Entrenamiento
+// Training
 func (nn *NeuralNetwork) Train(inputs, expected []float64) {
 	nn.Forward(inputs)
 	nn.Backpropagation(inputs, expected)

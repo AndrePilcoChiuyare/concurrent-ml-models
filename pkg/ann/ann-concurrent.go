@@ -4,9 +4,9 @@ import (
 	"sync"
 )
 
-// Retropropagación concurrente
+// Concurrent backpropagation
 func (nn *NeuralNetwork) BackpropagationConcurrent(inputs, expected []float64) {
-	// Cálculo del error de la capa de salida
+	// Computing the output layer error
 	outputErrors := make([]float64, nn.outputs)
 	for i := range nn.outputLayer {
 		outputErrors[i] = expected[i] - nn.outputLayer[i]
@@ -14,7 +14,7 @@ func (nn *NeuralNetwork) BackpropagationConcurrent(inputs, expected []float64) {
 
 	var wg sync.WaitGroup
 
-	// Ajustar pesos de la capa de salida concurrentemente
+	// Adjust concurrently the output layer weights
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -28,7 +28,7 @@ func (nn *NeuralNetwork) BackpropagationConcurrent(inputs, expected []float64) {
 		}
 	}()
 
-	// Cálculo del error de la capa oculta
+	// Computing hidden layer error
 	hiddenErrors := make([]float64, nn.hiddenNeurons)
 	for i := 0; i < nn.hiddenNeurons; i++ {
 		errorSum := 0.0
@@ -38,7 +38,7 @@ func (nn *NeuralNetwork) BackpropagationConcurrent(inputs, expected []float64) {
 		hiddenErrors[i] = errorSum
 	}
 
-	// Ajustar pesos de la capa de entrada concurrentemente
+	// Adjusting concurrently the input layer weights
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -52,6 +52,6 @@ func (nn *NeuralNetwork) BackpropagationConcurrent(inputs, expected []float64) {
 		}
 	}()
 
-	// Esperar a que todas las goroutines terminen
+	// Wait for all goroutines to finish
 	wg.Wait()
 }

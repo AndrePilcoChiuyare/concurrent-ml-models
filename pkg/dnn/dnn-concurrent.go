@@ -3,35 +3,8 @@ package dnn
 import (
 	"fmt"
 	"math"
-	"math/rand"
 	"sync"
-	"time"
 )
-
-// Initialize the neural network with random weights and biases
-func (nn *NeuralNetwork) InitializeConcurrent(layerSizes []int, learningRate float64) {
-	nn.layerSizes = layerSizes
-	nn.learningRate = learningRate
-
-	// Initialize weights and biases for each layer
-	nn.weights = make([][][]float64, len(layerSizes)-1)
-	nn.biases = make([][]float64, len(layerSizes)-1)
-
-	rand.Seed(time.Now().UnixNano())
-	for l := 0; l < len(layerSizes)-1; l++ {
-		nn.weights[l] = make([][]float64, layerSizes[l])
-		for i := range nn.weights[l] {
-			nn.weights[l][i] = make([]float64, layerSizes[l+1])
-			for j := range nn.weights[l][i] {
-				nn.weights[l][i][j] = rand.Float64()*2 - 1 // Random values between -1 and 1
-			}
-		}
-		nn.biases[l] = make([]float64, layerSizes[l+1])
-		for i := range nn.biases[l] {
-			nn.biases[l][i] = rand.Float64()*2 - 1
-		}
-	}
-}
 
 // Forward propagation (concurrent at the layer level)
 func (nn *NeuralNetwork) ForwardConcurrent(input []float64) ([][]float64, []float64) {

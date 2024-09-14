@@ -8,7 +8,6 @@ import (
 
 // Data structures
 type UserRatings map[int]map[int]float32 // userId -> movieId -> rating
-type MovieRatings map[int][]float32      // movieId -> ratings
 
 // Load CSV file into a map
 func LoadCSV(filename string) (UserRatings, error) {
