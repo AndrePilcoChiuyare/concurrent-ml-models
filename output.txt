@@ -1,0 +1,56 @@
+(base) PS C:\Users\andre\OneDrive\Documentos\2024-02\concurrent-and-distributed-programming\PC2\concurrent-ml-models> go run main.go
+DNN Sequential training
+Epoch: 0, Error: 0.99953
+Epoch: 1, Error: 0.94693
+Epoch: 2, Error: 0.93495
+Concurrent training
+Epoch 0 starting...
+Epoch: 0, Error: 0.99572
+Epoch 1 starting...
+Epoch: 1, Error: 0.94273
+Epoch 2 starting...
+Epoch: 2, Error: 0.93113
+Colaborative filtering ---------------
+Recommended Movies (Sequential) for 1: [3448 43556 85295]
+Sequential recommendation time: 927.902ms
+Recommended Movies (Concurrent) for 1: [91673 6856 32170]
+Concurrent recommendation time: 780.9719ms
+---------------
+Matrix factorization ---------------
+Predicted rating (Sequential) for user 1 and item 2: 3.384974
+Sequential training time: 27.5542008s
+Predicted rating (Concurrent) for user 1 and item 2: 3.248678
+Concurrent training time: 1m11.3819163s
+---------------
+SVM ---------------
+Sequential weights: [0.8791601985703211 0.015170834374057272 0.5443412190812674 0.4424682813232684 -0.0005061455126807723 -0.8526530534004702 -0.4229144348810704 0.08566513492761113 -0.1156547
+5314834851 0.3412983800353812 0.26430338107953966 -0.4367029994716338 -0.35814489643286546 0.47500660313265575 0.03398737609517383 0.5038188587563253 -0.3719937749916364 0.355792520195959 -0.819276654715689 -0.5616642490061413 -0.8869951024635894 1.1587245050752952 -1.6524958848990519 2.8857395559565466]                                                                               Sequential bias: -812.4000000001162
+Sequential training time: 8.464059s
+Sequential accuracy: 49.85%
+---------------
+Concurrent weights: [44405.4475539893 -171.55070362223054 -170.6637759508301 105090.73951357504 -1046.6506035979587 -140540.61779376803 843.6565070657866 400.18201594361517 -78365.73095013997 
+775.79289638929 1768.3694841569652 -61119.74345371591 448.4048281172761 -502.1357593905683 -93117.0535579723 -249.90085693960685 -1695.139789320637 -53139.500804279895 -79718.11468224057 -68534.73985273133 -32419.842320429234 180512.05816434347 5970.0490412873705 71840.64659750888]                                                                                                      Concurrent bias: -5760.000000003423
+Concurrent training time: 26.7591234s
+Concurrent accuracy: 52.17%
+---------------
+Random Forest ---------------
+Sequential training time: 40.2539262s
+Sequential accuracy: 68.00%
+---------------
+Concurrent training time: 11.3184841s
+Concurrent accuracy: 68.00%
+---------------
+Artificial Neural Network ---------------
+Sequential training time: 38.9906957s
+Sequential accuracy: 52.09%
+---------------
+Concurrent training time: 38.0480388s
+Concurrent accuracy: 52.09%
+---------------
+Deep Neural Network ---------------
+Sequential training time: 3.6152099s
+Sequential accuracy: 57.83%
+---------------
+Concurrent training time: 1.4219095s
+Concurrent accuracy: 58.78%
+---------------
